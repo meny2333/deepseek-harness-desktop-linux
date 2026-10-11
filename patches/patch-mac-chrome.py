@@ -26,6 +26,8 @@
 用法: patch-mac-chrome.py <resources/app 目录>
 """
 import sys
+import subprocess
+from pathlib import Path
 
 TITLEBAR_HEIGHT = 48
 
@@ -502,7 +504,7 @@ def main(app_dir: str) -> int:
     print('\n'.join(notes))
     print(inject_preload(f'{app_dir}/lib/preload-app.cjs', MAIN_MARK_CALL, MAIN_EXTRA_CSS))
     print(inject_preload(f'{app_dir}/lib/preload-welcome.cjs', WELCOME_MARK_CALL, WELCOME_EXTRA_CSS))
-    return 0
+    return subprocess.call([sys.executable, str(Path(__file__).with_name("patch-window-state.py")), app_dir])
 
 
 if __name__ == '__main__':

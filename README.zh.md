@@ -300,3 +300,5 @@ qemu-aarch64-static -L <sysroot> out-arm64/resources/runtime/.../node -e "consol
 - 应用本体版权归 **DeepSeek**，本工具链只做重新打包，不修改业务逻辑；
 - 请遵守原应用的许可条款，勿将重打包产物用于商业分发；
 - 官方无 Linux 更新源，产物已移除 `app-update.yml`，升级需重新打包。
+
+最大化与全屏的区别，以及显式全屏兼容开关，见 [Linux 最大化与全屏](README.md#linux-最大化与全屏)。

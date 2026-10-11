@@ -1,0 +1,42 @@
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const code = fs.readFileSync(0, 'utf8');
+function create(fallback = false) {
+  const root = {dataset:{}};
+  const handlers = {}, windowHandlers = {};
+  let resolve;
+  const initial = new Promise(r => resolve = r);
+  const window = {innerWidth:1200,innerHeight:800,screen:{availWidth:1200,availHeight:800},addEventListener:(n,f)=>windowHandlers[n]=f};
+  const context = {process:{env:{DSH_TILING_FULLSCREEN_FALLBACK:fallback?'1':'0'}},document:{documentElement:root,addEventListener(){}},window,CHANNEL:'controls',electron:{ipcRenderer:{on:(n,f)=>handlers[n]=f,invoke:()=>initial}}};
+  vm.runInNewContext(code,context);
+  return {root,window,initial:resolve,resize:()=>windowHandlers.resize(),state:s=>handlers['dsh-desktop:linux-window-state']({},s)};
+}
+(async()=>{
+  const ordinary = create();
+  assert.equal(ordinary.root.dataset.fullscreen, undefined, 'screen-sized normal window');
+  ordinary.state({fullscreen:false,maximized:true});
+  assert.equal(ordinary.root.dataset.fullscreen, undefined, 'maximized retains controls');
+  assert.equal(ordinary.root.dataset.dshWindowMaximized,'true');
+  ordinary.state({fullscreen:true,maximized:false});
+  ordinary.window.innerWidth=600;
+  ordinary.resize();
+  assert.equal(ordinary.root.dataset.fullscreen,'true','native fullscreen wins with small viewport');
+  ordinary.state({fullscreen:false,maximized:false});
+  assert.equal(ordinary.root.dataset.fullscreen,undefined,'leave fullscreen');
+  const compat=create(true);
+  assert.equal(compat.root.dataset.fullscreen,'true','opt-in geometry fallback');
+  compat.state({fullscreen:false,maximized:true});
+  assert.equal(compat.root.dataset.fullscreen,undefined,'known maximize suppresses heuristic');
+  compat.state({fullscreen:false,maximized:false});
+  compat.window.innerHeight=700;compat.resize();
+  assert.equal(compat.root.dataset.fullscreen,undefined,'fallback exits on shrink');
+  const initial=create();initial.initial({fullscreen:true,maximized:false});
+  await Promise.resolve();
+  assert.equal(initial.root.dataset.fullscreen,'true','initial state query');
+  const race=create();race.state({fullscreen:true,maximized:false});race.initial({fullscreen:false,maximized:false});
+  await Promise.resolve();
+  assert.equal(race.root.dataset.fullscreen,'true','ignore stale initial state');
+  race.state(false);assert.equal(race.root.dataset.fullscreen,'true','ignore malformed state');
+  console.log('window state runtime checks passed');
+})().catch(e=>{console.error(e);process.exitCode=1});
