@@ -429,11 +429,3 @@ pointer-events:none`），侧栏本身只保留 `background:0 0`。这样：
 - 体积优化：Python 载荷 421 → 231 MB、Node 载荷 204 → 104 MB，压缩改用 xz / zstd。
 
 > 该版产物与缓存后续被用户删除，其补丁与方案已在 2.0.0 中按新版重新实现。
-
-## 2026-10-11：区分 Linux 最大化与全屏
-
-- 全屏状态不再与 `isMaximized()` 合并；独立发送两种原生状态。
-- 尺寸推断改为显式 `DSH_TILING_FULLSCREEN_FALLBACK=1` 兼容选项，默认关闭。
-- 真实全屏不再被后续 resize 的尺寸推断清除，初始查询不会覆盖更新的状态事件。
-- 全新构建和旧应用树升级均调用同一状态补丁。
-- 本机 KDE Wayland 会话下，Electron 44.4.5 的 XWayland / 原生 Wayland 独立窗口测试均报告了正确的最大化和全屏状态。XWayland 最大化与全屏视口尺寸相同；niri 尚无实机验证。

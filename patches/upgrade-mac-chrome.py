@@ -5,8 +5,6 @@ patch-mac-chrome.py 是幂等的（已注入就跳过），因此修复已注入
 在原地做等价替换。用法: upgrade-mac-chrome.py <resources/app 目录>
 """
 import sys
-import subprocess
-from pathlib import Path
 
 OLD_CSS_BLOCK = """/* macOS vibrancy approximation: translucent sidebar over a blurred backdrop. */
 html[data-dsh-mac-chrome] [class*="_sidebarCol"] {
@@ -164,7 +162,7 @@ def upgrade_main_js(app_dir: str) -> None:
     """把 Linux 全屏事件注册补进 lib/main.js（幂等）。"""
     path = f'{app_dir}/lib/main.js'
     src = open(path, encoding='utf8').read()
-    if 'dsh-desktop:linux-window-state' in src or 'process.platform === "linux" && window.isMaximized()' in src:
+    if 'process.platform === "linux" && window.isMaximized()' in src:
         print(f'  · 全屏事件已注册: {path}')
         return
     if OLD_FS in src:
@@ -224,7 +222,7 @@ def main(app_dir: str) -> int:
         open(path, 'w', encoding='utf8').write(src)
         print(f'== {path}')
         print('\n'.join(notes))
-    return subprocess.call([sys.executable, str(Path(__file__).with_name("patch-window-state.py")), app_dir])
+    return 0
 
 
 if __name__ == '__main__':
