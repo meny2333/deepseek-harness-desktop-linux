@@ -35,7 +35,7 @@
 ├── patches/
 │   ├── patch-main.py            平台准入 / resources 根 / 打包态 / 托盘 / 窗口控制 IPC
 │   ├── patch-mac-chrome.py      macOS 风格装饰：左置交通灯 + 侧栏毛玻璃
-│   ├── patch-fingerprint.py     放宽 V8 指纹白名单（x64 0x17cdd、arm64 0x1df14）
+│   ├── patch-fingerprint.py     按 ELF 符号定位并放宽 V8 指纹白名单（x64 / arm64）
 │   ├── patch-titlebar.py        早期隐藏标题栏方案（已被 patch-mac-chrome 取代）
 │   └── upgrade-mac-chrome.py    对已打过旧版 chrome 的树做增量修复（幂等）
 ├── image-worker-src/
@@ -53,6 +53,21 @@
 ```
 
 ---
+
+## 自动构建工具链
+
+```bash
+./auto-build.sh --dry-run
+./auto-build.sh --formats deb --electron bundled --package-jobs 4
+./auto-build.sh --arch all --formats all
+```
+
+默认保留缓存、解包文件、构建目录和历史产物；`--clean` 显式清理中间文件。
+支持 AppImage、deb、RPM 与 pacman，`--electron` 选择 bundled/system 包型，
+`--package-jobs` 调整打包压缩线程数。ARM64 尚未在真实设备上完成运行验证。
+
+依赖、分阶段执行、网络配置与验证边界见 [自动构建文档](docs/AUTO_BUILD.md)。
+窗口外观使用本仓库现有补丁；本工具链不更改其默认材质或窗口行为。
 
 ## 快速开始
 
