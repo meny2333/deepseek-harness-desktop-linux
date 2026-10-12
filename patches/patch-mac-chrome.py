@@ -530,6 +530,9 @@ def main(app_dir: str) -> int:
     status = subprocess.call([sys.executable, str(Path(__file__).with_name("patch-fullscreen-reveal.py")), app_dir])
     if status:
         return status
+    status = subprocess.call([sys.executable, str(Path(__file__).with_name("patch-linux-identity.py")), app_dir])
+    if status:
+        return status
     return subprocess.call([sys.executable, str(Path(__file__).with_name("patch-personal-rounded.py")), app_dir])
 
 
