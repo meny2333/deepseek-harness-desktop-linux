@@ -21,6 +21,10 @@ on:
         description: 打包压缩线程数（留空用默认）
         type: string
         default: ""
+      dmg:
+        description: 载荷 dmg 地址（默认已验证的 0.2.0-rc.2 镜像；换其他版本需重跑补丁验证）
+        type: string
+        default: https://github.com/LinJianKun/deepseek-harness-desktop-mirror/releases/download/v0.2.0-rc.2/deepseek-harness-0.2.0-rc.2-mac-arm64.dmg
   push:
     branches: [main]
 
@@ -65,7 +69,8 @@ jobs:
           FORMATS: ${{ inputs.formats || 'all' }}
           ARCH: ${{ inputs.arch || 'x64' }}
           ELECTRON: ${{ inputs.electron || 'both' }}
-        run: ./auto-build.sh --dry-run --formats "$FORMATS" --arch "$ARCH" --electron "$ELECTRON" --no-proxy
+          DMG: ${{ inputs.dmg || 'https://github.com/LinJianKun/deepseek-harness-desktop-mirror/releases/download/v0.2.0-rc.2/deepseek-harness-0.2.0-rc.2-mac-arm64.dmg' }}
+        run: ./auto-build.sh --dry-run --formats "$FORMATS" --arch "$ARCH" --electron "$ELECTRON" --no-proxy --dmg "$DMG"
 
       - name: 构建安装包
         env:
@@ -73,10 +78,14 @@ jobs:
           ARCH: ${{ inputs.arch || 'x64' }}
           ELECTRON: ${{ inputs.electron || 'both' }}
           PACKAGE_JOBS: ${{ inputs.package_jobs }}
+          DMG: ${{ inputs.dmg || 'https://github.com/LinJianKun/deepseek-harness-desktop-mirror/releases/download/v0.2.0-rc.2/deepseek-harness-0.2.0-rc.2-mac-arm64.dmg' }}
         run: |
           args=(--formats "$FORMATS" --arch "$ARCH" --electron "$ELECTRON" --no-proxy)
           if [ -n "$PACKAGE_JOBS" ]; then
             args+=(--package-jobs "$PACKAGE_JOBS")
+          fi
+          if [ -n "$DMG" ]; then
+            args+=(--dmg "$DMG")
           fi
           ./auto-build.sh "${args[@]}"
 
