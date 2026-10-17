@@ -45,9 +45,20 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            p7zip-full curl tar xz-utils unzip coreutils binutils \
+            curl tar xz-utils unzip coreutils binutils \
             python3 python3-venv python3-pip \
             rpm libarchive-tools zstd squashfs-tools xvfb
+
+      - name: 安装 7-Zip 26.04（Ubuntu 的 p7zip 16.02 解不了新版 dmg）
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/7z.tar.xz https://github.com/ip7z/7zip/releases/download/26.04/7z2604-linux-x64.tar.xz
+          sudo mkdir -p /opt/7zip
+          sudo tar -xJf /tmp/7z.tar.xz -C /opt/7zip
+          if ! /opt/7zip/7zz i >/dev/null 2>&1; then sudo cp -f /opt/7zip/7zzs /opt/7zip/7zz; fi
+          sudo ln -sf /opt/7zip/7zz /usr/local/bin/7z
+          sudo ln -sf /opt/7zip/7zz /usr/local/bin/7za
+          7z | head -3
 
       - name: 逐项检查(dry-run)
         env:
